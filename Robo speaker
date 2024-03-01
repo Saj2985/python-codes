@@ -1,0 +1,9 @@
+if __name__ == '__main__':
+    speak = wincom.Dispatch("SAPI.SpVoice")
+    print("welcome to speaking Robot")
+    while True:
+        command = input("enter what you want me to speak\n")
+        if command == "quit":
+            speak.Speak("alright, see you later, bye bye")
+            break
+        speak.Speak(command)
