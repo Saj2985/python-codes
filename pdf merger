@@ -1,0 +1,13 @@
+import PyPDF2
+
+# a list of all the pdf file names
+pdfiles = ["i.pdf", "2.pdf", "3.pdf"] # a list of all the pdf file names
+
+merger = PyPDF2.PdfMerger()
+
+for filename in pdfiles:
+    pdFile = open(filename, 'rb')
+    pdfReader = PyPDF2.PdfReader(pdFile)
+    merger.append(pdfReader)
+
+pdFile.close()
