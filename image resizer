@@ -1,0 +1,15 @@
+import cv2
+
+source = "image.jpeg"# image name with extension
+destination = "new_image. jpeg"# final image name with the extension needed
+scale_percent = 50 # how much you want to tone down the image
+
+src = cv2.imread(source, cv2.IMREAD_UNCHANGED)
+
+new_width = int(src.shape[1] * scale_percent/100)
+new_length = int(src.shape[0] * scale_percent/100)
+
+output = cv2.resize(src, (new_width, new_length))
+
+cv2.imwrite(destination, output)
+cv2.waitKey(0)
