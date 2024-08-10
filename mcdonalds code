@@ -1,0 +1,72 @@
+import pandas as pd
+import numpy as np
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+from sklearn.cluster import KMeans
+from scipy.cluster.hierarchy import dendrogram, linkage
+from sklearn.metrics import adjusted_rand_score
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import cross_val_score
+import seaborn as sns
+
+# Load dataset
+mcdonalds = pd.read_csv('mcdonalds.csv')
+
+# Data preparation
+MD_x = mcdonalds.iloc[:, 0:11].apply(lambda x: x == "Yes").astype(int)
+
+# Principal Component Analysis (PCA)
+pca = PCA()
+MD_pca = pca.fit_transform(MD_x)
+print("PCA Summary:")
+print(np.round(np.cumsum(pca.explained_variance_ratio_), 2))
+
+# Plot PCA
+plt.scatter(MD_pca[:, 0], MD_pca[:, 1], color="grey")
+plt.title('PCA plot')
+plt.xlabel('Principal Component 1')
+plt.ylabel('Principal Component 2')
+plt.show()
+
+# K-Means Clustering
+kmeans_models = [KMeans(n_clusters=k, n_init=10, random_state=1234).fit(MD_x) for k in range(2, 9)]
+# Relabeling (not directly applicable, but kept in mind)
+MD_km28 = kmeans_models  # Placeholder
+MD_k4 = kmeans_models[2]  # Using 4 segments
+
+# Stability Analysis
+# In Python, this might involve checking consistency over multiple runs.
+MD_r4 = [kmeans.score(MD_x) for kmeans in MD_km28]
+
+# Plotting clusters
+plt.plot(range(2, 9), [model.inertia_ for model in kmeans_models])
+plt.title('KMeans Clustering')
+plt.xlabel('Number of segments')
+plt.ylabel('Inertia')
+plt.show()
+
+# Hierarchical clustering
+linked = linkage(MD_x.T, 'single')
+dendrogram(linked, labels=mcdonalds.columns[:11], orientation='top', distance_sort='descending', show_leaf_counts=True)
+plt.show()
+
+# Regression using Decision Tree
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+mcdonalds['Like.n'] = 6 - mcdonalds['Like'].astype(int)
+f = 'Like.n ~ ' + ' + '.join(mcdonalds.columns[:11])
+model = DecisionTreeClassifier(random_state=1234)
+model.fit(MD_x, mcdonalds['Like.n'])
+plot_tree(model)
+plt.show()
+
+# Cluster Analysis
+k4 = MD_k4.labels_
+visit = mcdonalds.groupby(k4)['VisitFrequency'].mean()
+like = mcdonalds.groupby(k4)['Like.n'].mean()
+female = mcdonalds.groupby(k4)['Gender'].apply(lambda x: np.mean(x == "Female"))
+
+plt.scatter(visit, like, s=10 * female, alpha=0.5)
+plt.xlabel('Visit Frequency')
+plt.ylabel('Like')
+plt.show()
